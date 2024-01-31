@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:news_application/routes.dart';
 
 import 'newsPage.dart';
 
@@ -17,12 +18,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
-          textTheme: const TextTheme(
-              titleMedium: TextStyle(
+          textTheme: TextTheme(
+              titleMedium: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
-                  fontWeight: FontWeight.w500))),
-      home: const NewsPage(),
+                  fontWeight: FontWeight.w500),
+              bodyMedium: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black),
+              bodySmall: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black.withOpacity(0.8)))),
+      routes: routes,
     );
   }
 }

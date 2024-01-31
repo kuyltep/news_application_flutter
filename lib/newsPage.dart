@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:news_application/fetchNewsData.dart';
+import 'package:news_application/newsPost.dart';
+
+import 'newsTile.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -9,21 +13,49 @@ class NewsPage extends StatefulWidget {
 
 class _NewsPageState extends State<NewsPage> {
   bool isOpen = false;
+  final controller = ScrollController();
+  List<NewsPost> newsPostsList = [];
+  List<NewsPost> searchedList = [];
+  List<NewsPost> newNewsPosts = [];
+  int pageNumber = 1;
+  @override
+  void didChangeDependencies() {
+    setState(() {
+      getNewsList(pageNumber).then((value) => {newsPostsList = value});
+      searchedList = newsPostsList;
+    });
+    super.didChangeDependencies();
+  }
+
+  @override
+  // void initState() {
+  //   getNewsList(pageNumber).then((value) => {newsPostsList = value});
+  //   searchedList = newsPostsList;
+  //   controller.addListener(() {
+  //     if (controller.position.maxScrollExtent == controller.offset) {
+  //       pageNumber++;
+  //       setState(() {
+  //         getNewsList(pageNumber).then((value) => newNewsPosts = value);
+  //         newsPostsList.addAll(newNewsPosts);
+  //       });
+  //     }
+  //   });
+  //   super.initState();
+  // }
 
   Widget _searchTextField() {
     return TextField(
       onChanged: (String s) {
-        // setState(() {
-        //   searchedList = [];
-        //   for (int i = 0; i < initialList.length; i++) {
-        //     final CryptoCoin coin = initialList[i];
-        //     final String coinName = coin.name;
-        //     if (coinName.contains(s.toUpperCase()) ||
-        //         coinName.contains(s.toLowerCase())) {
-        //       searchedList.add(coin);
-        //     }
-        //   }
-        // });
+        setState(() {
+          searchedList = [];
+          for (int i = 0; i < newsPostsList.length; i++) {
+            final NewsPost newsPost = newsPostsList[i];
+            final String newsTitle = newsPost.title;
+            if (newsTitle.toUpperCase().contains(s.toUpperCase())) {
+              searchedList.add(newsPost);
+            }
+          }
+        });
       },
       autofocus: true,
       cursorColor: Colors.white,
@@ -54,7 +86,6 @@ class _NewsPageState extends State<NewsPage> {
                   style: Theme.of(context).textTheme.titleMedium,
                 )
               : _searchTextField(),
-          centerTitle: true,
           actions: [
             !isOpen
                 ? IconButton(
@@ -79,6 +110,47 @@ class _NewsPageState extends State<NewsPage> {
                     ))
           ],
         ),
-        body: const Center());
+        body: RefreshIndicator(
+            color: Colors.blue,
+            backgroundColor: Colors.white,
+            strokeWidth: 2.0,
+            onRefresh: () {
+              setState(() {
+                pageNumber = 1;
+                getNewsList(pageNumber).then((value) => newsPostsList = value);
+              });
+              return Future<void>.delayed(const Duration(seconds: 1));
+            },
+            child: !isOpen
+                ? ListView.separated(
+                    controller: controller,
+                    // padding: const EdgeInsets.all(10),
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1, color: Colors.blue),
+                    itemCount: newsPostsList.length + 1,
+                    itemBuilder: ((context, index) {
+                      if (index < newsPostsList.length) {
+                        final NewsPost newsPost = newsPostsList[index];
+                        return NewsTile(newsPost: newsPost);
+                      }
+                      //else {
+                      //   return const Padding(
+                      //     padding: EdgeInsets.symmetric(vertical: 32),
+                      //     child: Center(
+                      //       child: CircularProgressIndicator(
+                      //           color: Colors.blue),
+                      //     ),
+                      //   );
+                      // }
+                    }))
+                : ListView.separated(
+                    // padding: const EdgeInsets.all(10),
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1, color: Colors.blue),
+                    itemCount: searchedList.length,
+                    itemBuilder: ((context, index) {
+                      final NewsPost newsPost = searchedList[index];
+                      return NewsTile(newsPost: newsPost);
+                    }))));
   }
 }

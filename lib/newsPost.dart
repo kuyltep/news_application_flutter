@@ -11,7 +11,7 @@ class NewsPost {
   final String title;
   final String author;
   final String url;
-  final String imageUrl;
+  final dynamic imageUrl;
   final String content;
   final String publishedAt;
 }
