@@ -1,31 +1,155 @@
 import 'package:flutter/material.dart';
 import 'package:news_application/newsPost.dart';
+import 'package:news_application/parseDateFunctions.dart';
+import 'package:url_launcher/link.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+
+import 'oneNewsPage.dart';
 
 class NewsTile extends StatelessWidget {
   const NewsTile({super.key, required this.newsPost});
   final NewsPost newsPost;
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-        leading: Image.network(
-          newsPost.imageUrl,
-          width: 70,
-          height: 70,
-        ),
-        title: Text(
-          newsPost.title.length > 40
-              ? "${newsPost.title.substring(0, 40)}..."
-              : newsPost.title,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        subtitle:
-            Text(newsPost.author, style: Theme.of(context).textTheme.bodySmall),
-        trailing: const Icon(
-          Icons.arrow_forward_ios,
-          color: Colors.blue,
-        ),
-        onTap: () {
-          Navigator.of(context).pushNamed("/news", arguments: newsPost);
-        });
+    return Container(
+      decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment(0.8, 1),
+            colors: <Color>[
+              Color.fromARGB(255, 218, 218, 218),
+              Color.fromARGB(255, 215, 233, 246),
+              Color.fromARGB(255, 162, 162, 162),
+            ], // Gradient from https://learnui.design/tools/gradient-generator.html
+            tileMode: TileMode.mirror,
+          )),
+      child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                child: newsPost.imageUrl != null
+                    ? ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(20)),
+                        child: Image.network(
+                          newsPost.imageUrl,
+                        ),
+                      )
+                    : Container(
+                        decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(20)),
+                        width: 300,
+                        height: 150,
+                        child: Center(
+                          child: Text("News without image",
+                              style: TextStyle(color: Colors.grey.shade800)),
+                        )),
+              ),
+              Column(
+                children: [
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      newsPost.title.length > 40
+                          ? "${newsPost.title.substring(0, 40)}..."
+                          : newsPost.title,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  Container(
+                      alignment: Alignment.centerLeft,
+                      margin: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        children: [
+                          Container(
+                              margin: const EdgeInsets.only(right: 5),
+                              child: const Icon(Icons.people)),
+                          Text(
+                            parseAuthorName(newsPost.author),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      )),
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(right: 5),
+                          child: Icon(
+                            Icons.date_range,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        Text(
+                          parseDateAndTime(newsPost.publishedAt),
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey.shade800),
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () {
+                            Navigator.pushNamed(context, "/news",
+                                arguments: newsPost);
+                          },
+                          label: const Text("News page"),
+                          icon: const Icon(Icons.newspaper),
+                        ),
+                        Link(
+                          target: LinkTarget.self,
+                          uri: Uri.parse(newsPost.url),
+                          builder: (context, openLink) => TextButton.icon(
+                            onPressed: openLink,
+                            label: const Text("Website"),
+                            icon: const Icon(Icons.web),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              )
+            ],
+          )),
+    );
   }
 }
+
+// Route _createRoute(NewsPost newsPost) {
+//   return PageRouteBuilder(
+//     pageBuilder: (context, animation, secondaryAnimation) =>
+//         OneNewsPage(newsPost: newsPost),
+//     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+//       const curve = Curves.ease;
+//       const begin = Offset(0.0, 1.0);
+//       const end = Offset.zero;
+//       final tween = Tween(begin: begin, end: end);
+//       final curvedAnimation = CurvedAnimation(
+//         parent: animation,
+//         curve: curve,
+//       );
+
+//       return SlideTransition(
+//         position: tween.animate(curvedAnimation),
+//         child: child,
+//       );
+//     },
+//   );
+// }

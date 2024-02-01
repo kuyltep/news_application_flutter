@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:news_application/fetchNewsData.dart';
 import 'package:news_application/newsPost.dart';
+import 'package:news_application/oneNewsPage.dart';
 
 import 'newsTile.dart';
 
@@ -18,16 +19,30 @@ class _NewsPageState extends State<NewsPage> {
   List<NewsPost> searchedList = [];
   List<NewsPost> newNewsPosts = [];
   int pageNumber = 1;
+  bool isLoading = true;
   @override
   void didChangeDependencies() {
-    setState(() {
-      getNewsList(pageNumber).then((value) => {newsPostsList = value});
-      searchedList = newsPostsList;
+    getNewsList(pageNumber).then((value) {
+      setState(() {
+        newsPostsList = value;
+        searchedList.addAll(newsPostsList);
+        isLoading = false;
+      });
+    });
+    controller.addListener(() {
+      if (controller.position.maxScrollExtent == controller.offset) {
+        pageNumber++;
+        getNewsList(pageNumber).then((value) {
+          setState(() {
+            newNewsPosts = value;
+            newsPostsList.addAll(newNewsPosts);
+          });
+        });
+      }
     });
     super.didChangeDependencies();
   }
 
-  @override
   // void initState() {
   //   getNewsList(pageNumber).then((value) => {newsPostsList = value});
   //   searchedList = newsPostsList;
@@ -110,47 +125,53 @@ class _NewsPageState extends State<NewsPage> {
                     ))
           ],
         ),
-        body: RefreshIndicator(
-            color: Colors.blue,
-            backgroundColor: Colors.white,
-            strokeWidth: 2.0,
-            onRefresh: () {
-              setState(() {
-                pageNumber = 1;
-                getNewsList(pageNumber).then((value) => newsPostsList = value);
-              });
-              return Future<void>.delayed(const Duration(seconds: 1));
-            },
-            child: !isOpen
-                ? ListView.separated(
-                    controller: controller,
-                    // padding: const EdgeInsets.all(10),
-                    separatorBuilder: (context, index) =>
-                        const Divider(height: 1, color: Colors.blue),
-                    itemCount: newsPostsList.length + 1,
-                    itemBuilder: ((context, index) {
-                      if (index < newsPostsList.length) {
-                        final NewsPost newsPost = newsPostsList[index];
-                        return NewsTile(newsPost: newsPost);
-                      }
-                      //else {
-                      //   return const Padding(
-                      //     padding: EdgeInsets.symmetric(vertical: 32),
-                      //     child: Center(
-                      //       child: CircularProgressIndicator(
-                      //           color: Colors.blue),
-                      //     ),
-                      //   );
-                      // }
-                    }))
-                : ListView.separated(
-                    // padding: const EdgeInsets.all(10),
-                    separatorBuilder: (context, index) =>
-                        const Divider(height: 1, color: Colors.blue),
-                    itemCount: searchedList.length,
-                    itemBuilder: ((context, index) {
-                      final NewsPost newsPost = searchedList[index];
-                      return NewsTile(newsPost: newsPost);
-                    }))));
+        body: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                color: Colors.blue,
+              ))
+            : RefreshIndicator(
+                color: Colors.blue,
+                backgroundColor: Colors.white,
+                strokeWidth: 2.0,
+                onRefresh: () {
+                  setState(() {
+                    pageNumber = 1;
+                    getNewsList(pageNumber)
+                        .then((value) => newsPostsList = value);
+                  });
+                  return Future<void>.delayed(const Duration(seconds: 1));
+                },
+                child: !isOpen
+                    ? ListView.separated(
+                        padding: const EdgeInsets.all(20),
+                        controller: controller,
+                        // padding: const EdgeInsets.all(10),
+                        separatorBuilder: (context, index) =>
+                            const Padding(padding: EdgeInsets.only(bottom: 20)),
+                        itemCount: newsPostsList.length + 1,
+                        itemBuilder: ((context, index) {
+                          if (index < newsPostsList.length) {
+                            final NewsPost newsPost = newsPostsList[index];
+                            return NewsTile(newsPost: newsPost);
+                          } else {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 22),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                    color: Colors.blue),
+                              ),
+                            );
+                          }
+                        }))
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(20),
+                        separatorBuilder: (context, index) =>
+                            const Padding(padding: EdgeInsets.only(bottom: 20)),
+                        itemCount: searchedList.length,
+                        itemBuilder: ((context, index) {
+                          final NewsPost newsPost = searchedList[index];
+                          return NewsTile(newsPost: newsPost);
+                        }))));
   }
 }
