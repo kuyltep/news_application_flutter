@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:news_application/parseDateFunctions.dart';
 import 'newsPost.dart';
 
 Future<List<NewsPost>> getNewsList(int page) async {
   final response = await Dio().get(
-      "https://newsapi.org/v2/everything?q=apple&from=2024-01-29&to=2024-01-29&pageSize=15&page=$page&sortBy=popularity&apiKey=3b9fa1a3902b46e99eff220dfa863836");
+      "https://newsapi.org/v2/everything?q=apple&from=2024-01-29&to=${madeNowSttingDate()}&pageSize=15&page=$page&sortBy=popularity&apiKey=3b9fa1a3902b46e99eff220dfa863836");
   final data = response.data as Map<String, dynamic>;
   final newsData = data["articles"] as List;
   List<NewsPost> newsPostsList = [];

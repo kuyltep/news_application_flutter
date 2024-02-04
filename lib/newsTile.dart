@@ -7,9 +7,23 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import 'oneNewsPage.dart';
 
-class NewsTile extends StatelessWidget {
+class NewsTile extends StatefulWidget {
   const NewsTile({super.key, required this.newsPost});
   final NewsPost newsPost;
+  @override
+  State<NewsTile> createState() => _NewsTileState();
+}
+
+class _NewsTileState extends State<NewsTile> {
+  late String activeElement;
+  @override
+  void initState() {
+    setState(() {
+      activeElement = "";
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,12 +45,12 @@ class NewsTile extends StatelessWidget {
             children: [
               Container(
                 margin: const EdgeInsets.only(bottom: 20),
-                child: newsPost.imageUrl != null
+                child: widget.newsPost.imageUrl != null
                     ? ClipRRect(
                         borderRadius:
                             const BorderRadius.all(Radius.circular(20)),
                         child: Image.network(
-                          newsPost.imageUrl,
+                          widget.newsPost.imageUrl,
                         ),
                       )
                     : Container(
@@ -56,9 +70,9 @@ class NewsTile extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     margin: const EdgeInsets.only(bottom: 10),
                     child: Text(
-                      newsPost.title.length > 40
-                          ? "${newsPost.title.substring(0, 40)}..."
-                          : newsPost.title,
+                      widget.newsPost.title.length > 40
+                          ? "${widget.newsPost.title.substring(0, 40)}..."
+                          : widget.newsPost.title,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -71,7 +85,7 @@ class NewsTile extends StatelessWidget {
                               margin: const EdgeInsets.only(right: 5),
                               child: const Icon(Icons.people)),
                           Text(
-                            parseAuthorName(newsPost.author),
+                            parseAuthorName(widget.newsPost.author),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -90,7 +104,7 @@ class NewsTile extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          parseDateAndTime(newsPost.publishedAt),
+                          parseDateAndTime(widget.newsPost.publishedAt),
                           style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
@@ -107,14 +121,14 @@ class NewsTile extends StatelessWidget {
                         TextButton.icon(
                           onPressed: () {
                             Navigator.pushNamed(context, "/news",
-                                arguments: newsPost);
+                                arguments: widget.newsPost);
                           },
                           label: const Text("News page"),
                           icon: const Icon(Icons.newspaper),
                         ),
                         Link(
                           target: LinkTarget.self,
-                          uri: Uri.parse(newsPost.url),
+                          uri: Uri.parse(widget.newsPost.url),
                           builder: (context, openLink) => TextButton.icon(
                             onPressed: openLink,
                             label: const Text("Website"),
@@ -123,6 +137,98 @@ class NewsTile extends StatelessWidget {
                         )
                       ],
                     ),
+                  ),
+                  Center(
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            child: activeElement == "thumbDown"
+                                ? IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        activeElement = "";
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.thumb_down_alt_outlined,
+                                      color: Colors.red,
+                                    ))
+                                : IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        activeElement = "thumbDown";
+                                      });
+                                    },
+                                    icon: const Icon(
+                                        Icons.thumb_down_alt_outlined)),
+                          ),
+                          Container(
+                            child: activeElement == "smileBad"
+                                ? IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        activeElement = "";
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.sentiment_dissatisfied_sharp,
+                                      color: Colors.red,
+                                    ))
+                                : IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        activeElement = "smileBad";
+                                      });
+                                    },
+                                    icon: const Icon(
+                                        Icons.sentiment_dissatisfied_sharp)),
+                          ),
+                          Container(
+                              child: activeElement == "smileGood"
+                                  ? IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          activeElement = "";
+                                        });
+                                      },
+                                      icon: const Icon(
+                                        Icons.sentiment_satisfied_alt,
+                                        color: Colors.green,
+                                      ))
+                                  : IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          activeElement = "smileGood";
+                                        });
+                                      },
+                                      icon: const Icon(
+                                          Icons.sentiment_satisfied_alt))),
+                          Container(
+                              child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 500),
+                            child: activeElement == "thumbUp"
+                                ? IconButton(
+                                    key: const Key("activeElement"),
+                                    onPressed: () {
+                                      setState(() {
+                                        activeElement = "";
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.thumb_up_outlined,
+                                      color: Colors.green,
+                                    ))
+                                : IconButton(
+                                    key: const Key("activeElement"),
+                                    onPressed: () {
+                                      setState(() {
+                                        activeElement = "thumbUp";
+                                      });
+                                    },
+                                    icon: const Icon(Icons.thumb_up_outlined)),
+                          ))
+                        ]),
                   )
                 ],
               )
@@ -132,7 +238,7 @@ class NewsTile extends StatelessWidget {
   }
 }
 
-// Route _createRoute(NewsPost newsPost) {
+// Route _createRoute(widget.NewsPost newsPost) {
 //   return PageRouteBuilder(
 //     pageBuilder: (context, animation, secondaryAnimation) =>
 //         OneNewsPage(newsPost: newsPost),

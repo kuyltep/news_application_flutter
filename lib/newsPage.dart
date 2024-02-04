@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:news_application/fetchNewsData.dart';
 import 'package:news_application/newsPost.dart';
 import 'package:news_application/oneNewsPage.dart';
+import 'package:news_application/sortedPostsFunction.dart';
 
 import 'newsTile.dart';
+
+List<String> list = <String>['Default', 'Title', 'Author', 'Date'];
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -18,10 +21,13 @@ class _NewsPageState extends State<NewsPage> {
   List<NewsPost> newsPostsList = [];
   List<NewsPost> searchedList = [];
   List<NewsPost> newNewsPosts = [];
+  List<NewsPost> sortedNewsPosts = [];
   int pageNumber = 1;
   bool isLoading = true;
+  String dropdownValue = list.first;
   @override
   void didChangeDependencies() {
+    setState(() {});
     getNewsList(pageNumber).then((value) {
       setState(() {
         newsPostsList = value;
@@ -43,23 +49,8 @@ class _NewsPageState extends State<NewsPage> {
     super.didChangeDependencies();
   }
 
-  // void initState() {
-  //   getNewsList(pageNumber).then((value) => {newsPostsList = value});
-  //   searchedList = newsPostsList;
-  //   controller.addListener(() {
-  //     if (controller.position.maxScrollExtent == controller.offset) {
-  //       pageNumber++;
-  //       setState(() {
-  //         getNewsList(pageNumber).then((value) => newNewsPosts = value);
-  //         newsPostsList.addAll(newNewsPosts);
-  //       });
-  //     }
-  //   });
-  //   super.initState();
-  // }
-
   Widget _searchTextField() {
-    return TextField(
+    return TextFormField(
       onChanged: (String s) {
         setState(() {
           searchedList = [];
@@ -73,18 +64,18 @@ class _NewsPageState extends State<NewsPage> {
         });
       },
       autofocus: true,
-      cursorColor: Colors.white,
-      style: const TextStyle(color: Colors.white, fontSize: 18),
+      cursorColor: Colors.grey.shade500,
+      style: const TextStyle(color: Colors.white, fontSize: 14),
       textInputAction: TextInputAction.search,
-      decoration: const InputDecoration(
-        enabledBorder:
-            UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-        focusedBorder:
-            UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+      decoration: InputDecoration(
+        enabledBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.white)),
+        focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.shade500)),
         hintText: 'Search...',
-        hintStyle: TextStyle(
+        hintStyle: const TextStyle(
           color: Colors.white60,
-          fontSize: 18,
+          fontSize: 14,
         ),
       ),
     );
@@ -94,7 +85,7 @@ class _NewsPageState extends State<NewsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.blue.shade600,
+          backgroundColor: const Color.fromARGB(255, 31, 77, 116),
           title: !isOpen
               ? Text(
                   "News",
@@ -103,15 +94,57 @@ class _NewsPageState extends State<NewsPage> {
               : _searchTextField(),
           actions: [
             !isOpen
-                ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isOpen = !isOpen;
-                      });
-                    },
-                    icon: const Icon(
-                      Icons.search,
-                      color: Colors.white,
+                ? Container(
+                    margin: const EdgeInsets.only(right: 5),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(right: 15),
+                          child: Text("Sorted by: ",
+                              style: Theme.of(context).textTheme.titleSmall),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(right: 15),
+                          child: DropdownButton<String>(
+                              borderRadius: BorderRadius.circular(20),
+                              dropdownColor:
+                                  const Color.fromARGB(255, 31, 77, 116),
+                              value: dropdownValue,
+                              icon: const Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.white,
+                              ),
+                              elevation: 16,
+                              style: const TextStyle(color: Colors.white),
+                              onChanged: (String? value) {
+                                // This is called when the user selects an item.
+                                setState(() {
+                                  dropdownValue = value!;
+                                  sortedNewsPosts =
+                                      postsSort(newsPostsList, value);
+                                });
+                              },
+                              items: list.map<DropdownMenuItem<String>>(
+                                  (String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList()),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isOpen = !isOpen;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.search,
+                              color: Colors.white,
+                            )),
+                      ],
                     ))
                 : IconButton(
                     onPressed: () {
@@ -136,13 +169,14 @@ class _NewsPageState extends State<NewsPage> {
                 strokeWidth: 2.0,
                 onRefresh: () {
                   setState(() {
+                    dropdownValue = "Default";
                     pageNumber = 1;
                     getNewsList(pageNumber)
                         .then((value) => newsPostsList = value);
                   });
                   return Future<void>.delayed(const Duration(seconds: 1));
                 },
-                child: !isOpen
+                child: !isOpen && dropdownValue == "Default"
                     ? ListView.separated(
                         padding: const EdgeInsets.all(20),
                         controller: controller,
@@ -164,14 +198,24 @@ class _NewsPageState extends State<NewsPage> {
                             );
                           }
                         }))
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(20),
-                        separatorBuilder: (context, index) =>
-                            const Padding(padding: EdgeInsets.only(bottom: 20)),
-                        itemCount: searchedList.length,
-                        itemBuilder: ((context, index) {
-                          final NewsPost newsPost = searchedList[index];
-                          return NewsTile(newsPost: newsPost);
-                        }))));
+                    : !isOpen && dropdownValue != "Default"
+                        ? ListView.separated(
+                            padding: const EdgeInsets.all(20),
+                            separatorBuilder: (context, index) => const Padding(
+                                padding: EdgeInsets.only(bottom: 20)),
+                            itemCount: sortedNewsPosts.length,
+                            itemBuilder: ((context, index) {
+                              final NewsPost newsPost = sortedNewsPosts[index];
+                              return NewsTile(newsPost: newsPost);
+                            }))
+                        : ListView.separated(
+                            padding: const EdgeInsets.all(20),
+                            separatorBuilder: (context, index) => const Padding(
+                                padding: EdgeInsets.only(bottom: 20)),
+                            itemCount: searchedList.length,
+                            itemBuilder: ((context, index) {
+                              final NewsPost newsPost = searchedList[index];
+                              return NewsTile(newsPost: newsPost);
+                            }))));
   }
 }
