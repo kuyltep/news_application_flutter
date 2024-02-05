@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:news_application/fetchNewsData.dart';
-import 'package:news_application/newsPost.dart';
-import 'package:news_application/oneNewsPage.dart';
-import 'package:news_application/sortedPostsFunction.dart';
+import 'package:news_application/data/fetchNewsData.dart';
+import 'package:news_application/data/newsPost.dart';
+import 'package:news_application/pages/oneNewsPage.dart';
+import 'package:news_application/functions/sortedPostsFunction.dart';
 
-import 'newsTile.dart';
+import '../widgets/newsTile.dart';
 
 List<String> list = <String>['Default', 'Title', 'Author', 'Date'];
 

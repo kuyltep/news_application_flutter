@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:news_application/parseDateFunctions.dart';
+import 'package:news_application/functions/parseDateFunctions.dart';
 import 'newsPost.dart';
 
 Future<List<NewsPost>> getNewsList(int page) async {

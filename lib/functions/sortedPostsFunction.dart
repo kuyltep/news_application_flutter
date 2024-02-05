@@ -1,6 +1,6 @@
 import 'dart:core';
 
-import 'package:news_application/newsPost.dart';
+import 'package:news_application/data/newsPost.dart';
 
 List<NewsPost> postsSort(List<NewsPost> dataList, String sortedBy) {
   List<NewsPost> copyDataList = [...dataList];

@@ -1,7 +1,11 @@
 import 'package:intl/intl.dart';
 
 String parseDateAndTime(String date) {
-  return "Published ${date.replaceAll("T", " at ").replaceAll("Z", "")}";
+  String dateString = date.substring(0, 10);
+  String timeString = date.substring(10, date.length);
+  dateString = dateString.split("-").reversed.join(".");
+  String finalString = dateString + timeString;
+  return "Published ${finalString.replaceAll("T", " at ").replaceAll("Z", "")}";
 }
 
 String parseAuthorName(String name) {

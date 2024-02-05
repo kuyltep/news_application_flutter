@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:news_application/newsPage.dart';
-import 'package:news_application/routes.dart';
+import 'package:news_application/pages/newsPage.dart';
+import 'package:news_application/routes/routes.dart';
 
 void main() {
   runApp(const MyApp());
