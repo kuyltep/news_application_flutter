@@ -25,6 +25,11 @@ class _NewsPageState extends State<NewsPage> {
   int pageNumber = 1;
   bool isLoading = true;
   String dropdownValue = list.first;
+  final GlobalKey<AnimatedListState> _key = GlobalKey();
+  void _addItem(NewsPost post) {
+    newsPostsList.insert(newNewsPosts.length, post);
+  }
+
   @override
   void didChangeDependencies() {
     setState(() {});

@@ -12,10 +12,13 @@ class OneNewsPage extends StatefulWidget {
 class _OneNewsPageState extends State<OneNewsPage> {
   @override
   NewsPost? newsPost;
+  bool isFullContent = false;
   void didChangeDependencies() {
     final args = ModalRoute.of(context)?.settings.arguments;
     newsPost = args as NewsPost;
-    setState(() {});
+    setState(() {
+      isFullContent = false;
+    });
     super.didChangeDependencies();
   }
 
@@ -116,9 +119,98 @@ class _OneNewsPageState extends State<OneNewsPage> {
                       ],
                     )),
                 Container(
-                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                   padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                )
+                ),
+                Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.content_copy_rounded, color: Colors.black),
+                        Text("News content:",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 22)),
+                      ],
+                    )),
+                Container(
+                    padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                    child: Column(
+                      children: [
+                        Visibility(
+                            maintainAnimation: true,
+                            maintainState: true,
+                            visible: !isFullContent ? true : false,
+                            child: AnimatedOpacity(
+                              curve: Curves.easeInOutCubicEmphasized,
+                              opacity: !isFullContent ? 1 : 0,
+                              duration: const Duration(milliseconds: 700),
+                              child: Column(
+                                children: [
+                                  Text(
+                                      newsPost!.content.substring(
+                                          0,
+                                          (newsPost!.content.length / 2)
+                                              .round()),
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400)),
+                                  TextButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          isFullContent = !isFullContent;
+                                        });
+                                      },
+                                      icon: const Icon(Icons.arrow_drop_down,
+                                          color:
+                                              Color.fromARGB(255, 31, 77, 116)),
+                                      label: const Text("Show more",
+                                          style: TextStyle(
+                                              color: Color.fromARGB(
+                                                  255, 31, 77, 116),
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500))),
+                                ],
+                              ),
+                            )),
+                        Visibility(
+                            visible: isFullContent ? true : false,
+                            maintainState: true,
+                            maintainAnimation: true,
+                            child: AnimatedOpacity(
+                                opacity: isFullContent ? 1 : 0,
+                                duration: const Duration(milliseconds: 700),
+                                curve: Curves.easeInOutCubicEmphasized,
+                                child: Column(
+                                  children: [
+                                    Text(newsPost!.content,
+                                        style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w400)),
+                                    TextButton.icon(
+                                        onPressed: () {
+                                          setState(() {
+                                            isFullContent = !isFullContent;
+                                          });
+                                        },
+                                        icon: const Icon(Icons.arrow_drop_up,
+                                            color: Color.fromARGB(
+                                                255, 31, 77, 116)),
+                                        label: const Text("Show less",
+                                            style: TextStyle(
+                                                color: Color.fromARGB(
+                                                    255, 31, 77, 116),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500))),
+                                  ],
+                                )))
+                      ],
+                    )),
               ],
             ))));
   }
